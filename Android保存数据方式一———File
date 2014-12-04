@@ -1,0 +1,39 @@
+在Android中保存文件有两种：自带存储空间、SDCard。
+且有4种文件操作mode：
+Context.MODE_PRIVATE:为默认操作模式，代表该文件是私有数据，只能被本文件使用，本模式下，写入的数据会覆盖原文件
+Context.MODE_APPEND：存在就往文件中追加内容
+MODE_WORLD_READABLE:表示当前文件可以被其他应用读取
+MODE_WORLD_WRITEABLE:表示当前文件可以被其他应用写入
+openFileOutput("itcast.txt",Context.MODE_WORLD_READABLE + Context.MODE_WORLD_WRITEABLE);
+
+自带存储空间：
+  （写）
+  FileOutputStream outStream = context.openFileOutput(filename,mode);//得到文件输出流对象，上下文对象的openFileOutput返回文件输出流对象
+  outStream.write(content.getBytes());//写进文件
+  outstream.close();//关掉输出流
+  默认保存在包底下的files文件夹下
+  （读）
+  FileInputStream inStream = context.openFileInput(filename);//得到文件输入流对象
+  ByteArrayOutputStream outStream = new ByteArrayOutputStream();//暂时向内存中写入数据
+  byte[] buffer = new byte[1024];//输入流读到字节数组中，数组满了后inStream.read(buffer)返回（为int型，流读完了就是-1，没读完就是已经从流中读了多少数据）
+  int len = 0;//read到的位置
+  while((len = inStream.read(buffer)) != -1){  
+    outStream.write(buffer,0,len);//字符数组0-len写入内存
+  }
+  byte[] data = outStream.toByteArray();从内存中得到所有数据
+  return new String(data);//重写String方法。
+
+SDCard：（路径为/mnt/sdcard)
+  （写）
+  写入之前要判断SD卡是否插到手机上是否可以读写：
+  if(Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED){可以写数据}//存在且可读写
+  or（SD卡不存在或者写保护）
+  File file = new File(new File("/mnt/sdcard",filename);//最好不用绝对路径：Environment.getExternalStorageDirectory()
+  FileOutputStream outStream = new FileOutStream(file);
+  outStream.write(content.getBytes());
+  outStream.close();
+  另外还要写入权限：
+  <!-在SDCard中创建与删除文件权限-->
+  <uses-permission android:name="android.permission.MOUNT_UNMOUT_FILESYSTEMS"/>
+  <!-往SDCard中写入数据权限-->
+  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
